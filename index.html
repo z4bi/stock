@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Accounts</title>
+<style>
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background: black;
+  font-family: Arial, sans-serif;
+}
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  backdrop-filter: blur(10px);
+  background-color: rgba(0,0,0,0.3);
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 0 0 15px 15px;
+  z-index: 10;
+}
+.topbar button {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  padding: 8px 15px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+}
+.topbar button.active {
+  background: rgba(255,255,255,0.3);
+}
+.container {
+  margin-top: 80px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 15px;
+  padding: 20px;
+}
+.card {
+  backdrop-filter: blur(15px);
+  background-color: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+  color: white;
+}
+.card img {
+  width: 90%;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  object-fit: cover;
+}
+.notify {
+  display: none;
+}
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div class="topbar" id="topbar"></div>
+<div class="container" id="container"></div>
+<script>
+const sections = [
+  "all","main","alt","stacked","semi stacked","decent amount of items","couple of items","an item or 2","name snipes",
+  "id snipes","the hatch eggs","reset user","empty"
+];
+const sectionPriority = {
+  main: 1,
+  alt: 2,
+  stacked: 3,
+  "semi stacked": 4,
+  "decent amount of items": 5,
+  "couple of items": 6,
+  "an item or 2": 7,
+  "name snipes": 8,
+  "id snipes": 9,
+  "the hatch eggs": 10,
+  "reset user": 11,
+  "empty": 12
+};
+
+const accounts = [
+  {type:"decent amount of items",username:"Milkychipy",desc:"owns 41 hats, 13 offsale hats, 2021 account",img:"https://tr.rbxcdn.com/30DAY-AvatarHeadshot-A1B1F9C59C8258DD98B5013635B88EAC-Png/150/150/AvatarHeadshot/Webp/noFilter"},
+  {type:"main",username:"Zabicr",desc:"owns 192 hats, 141 offsale hats, 2012 account, Many badges+20k visits game",img:"https://tr.rbxcdn.com/30DAY-Avatar-04457C77AE157465CDDE7CC35C667770-Png/352/352/Avatar/Webp/noFilter"},
+  {type:"name snipes",username:"Jyynx",desc:"empty namesnipe, 2013 account",img:"https://images-ext-1.discordapp.net/external/JRGSSfZwlEo0hnREYYXNU2ou2QqrIgGdOj7OP30MjOM/https/tr.rbxcdn.com/30DAY-Avatar-8BE97E8DD0C258E8FAE2D327B883B6E2-Png/420/420/Avatar/Png/noFilter"},
+  {type:"name snipes",username:"C7W4",desc:"owns just a hair+shirt and pants, has 7 robux, 2019 account",img:"https://tr.rbxcdn.com/30DAY-Avatar-3CD5206D2693562B51CFAAA6BD31D7EF-Png/352/352/Avatar/Webp/noFilter"},
+  {type:"empty",username:"radio8331",desc:"empty, 2023 account",img:"https://tr.rbxcdn.com/30DAY-Avatar-0C8681DD9D8F8101B2E96C6F9F0C6BDD-Png/352/352/Avatar/Webp/noFilter"},
+  {type:"empty",username:"1tony91",desc:"empty unverified, 2009 account",img:"https://tr.rbxcdn.com/30DAY-Avatar-65702E934C4B6F1B4651788B004F1397-Png/352/352/Avatar/Webp/noFilter"},
+  {type:"empty",username:"spikey23",desc:"owns some 2008 clothing, 2008 account",img:"https://tr.rbxcdn.com/30DAY-Avatar-109EFA6394B75EFF205B55C78FD3B997-Png/352/352/Avatar/Webp/noFilter"},
+  {type:"couple of items",username:"roblox_user_7315215077",desc:"owns 14 hats, 2 offsale hats, 2024 account, decent at slap battles",img:"https://tr.rbxcdn.com/30DAY-Avatar-F8BB0950D2CF844491C377FF5F8B9566-Png/352/352/Avatar/Webp/noFilter"},
+  {type:"empty",username:"nonokpkp",desc:"empty, i have oge+ogp, 2013 account",img:"https://tr.rbxcdn.com/30DAY-Avatar-40A17ADF8ED52B134212769483EF4A44-Png/352/352/Avatar/Webp/noFilter"},
+  {type:"alt",username:"Antitrio",desc:"owns 196 hats, 30 offsale hats, 2020 account, 3k rap+adurite bucket+turbo and outrageous builders club hats+ 40$-50$ worth golden korblox general",img:"https://tr.rbxcdn.com/30DAY-Avatar-BB2BB9D5B47E2DAA5D271FB3C93875E3-Png/352/352/Avatar/Webp/noFilter"},
+  {type:"couple of items",username:"radio8331andrew",desc:"owns 1 hat it's a giftcard hat, 2023 account",img:"https://tr.rbxcdn.com/30DAY-Avatar-88D1C1E631D59016A667E016C9808310-Png/352/352/Avatar/Webp/noFilter"},
+  {type:"stacked",username:"HDFHBVGGH",desc:"owns 67 hats, 3 limited hats, 1.2k rap, 4 pages of gamepasses+100k visits game also has premium until april 2028",img:"https://tr.rbxcdn.com/30DAY-Avatar-D6921DDACF1A80C0BFED3576B5C44762-Png/352/352/Avatar/Webp/noFilter"}
+];
+
+const container=document.getElementById("container");
+const topbar=document.getElementById("topbar");
+
+sections.forEach(sec=>{
+  const btn=document.createElement("button");
+  btn.textContent=sec;
+  btn.onclick=()=>filterAccounts(sec);
+  topbar.appendChild(btn);
+});
+
+function filterAccounts(type){
+  document.querySelectorAll(".topbar button").forEach(b=>b.classList.remove("active"));
+  [...topbar.children].find(b=>b.textContent===type).classList.add("active");
+  displayAccounts(type);
+}
+
+function displayAccounts(type){
+  container.innerHTML="";
+  let filtered = accounts;
+  if(type!=="all"){
+    filtered = accounts.filter(acc => acc.type === type);
+  } else {
+    filtered = [...accounts].sort((a,b)=>{
+      const pa = sectionPriority[a.type] || 999;
+      const pb = sectionPriority[b.type] || 999;
+      return pa - pb;
+    });
+  }
+  for(const acc of filtered){
+    const card=document.createElement("div");
+    card.className="card";
+    card.innerHTML=`<img src="${acc.img}" alt="${acc.username}"><h3>${acc.username}</h3><p>${acc.desc}</p>`;
+    container.appendChild(card);
+  }
+}
+
+filterAccounts("all");
+
+class Triangle{
+  constructor(){this.reset();}
+  reset(){
+    this.x=Math.random()*canvas.width;
+    this.y=-20;
+    this.baseSize=10+Math.random()*20;
+    this.size=this.baseSize;
+    this.opacity=Math.random()*0.3+0.2;
+    this.speed=0.5+Math.random();
+  }
+  update(mx,my){
+    this.y+=this.speed;
+    if(this.y>canvas.height)this.reset();
+    const dist=Math.hypot(this.x-mx,this.y-my);
+    if(dist<100){
+      this.size=Math.min(this.baseSize+4,this.size+0.2);
+    }else{
+      this.size=Math.max(this.baseSize,this.size-0.1);
+    }
+  }
+  draw(){
+    ctx.beginPath();
+    ctx.moveTo(this.x,this.y);
+    ctx.lineTo(this.x-this.size,this.y+this.size);
+    ctx.lineTo(this.x+this.size,this.y+this.size);
+    ctx.closePath();
+    ctx.fillStyle=`rgba(255,255,255,${this.opacity})`;
+    ctx.fill();
+  }
+}
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+let triangles=[];
+for(let i=0;i<60;i++)triangles.push(new Triangle());
+let mouseX=-100,mouseY=-100;
+window.addEventListener("mousemove",e=>{mouseX=e.clientX;mouseY=e.clientY;});
+function animate(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  triangles.forEach(t=>{t.update(mouseX,mouseY);t.draw();});
+  requestAnimationFrame(animate);
+}
+animate();
+window.addEventListener("resize",()=>{
+  canvas.width=window.innerWidth;
+  canvas.height=window.innerHeight;
+});
+</script>
+</body>
+</html>
